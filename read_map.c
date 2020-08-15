@@ -4,35 +4,48 @@
 
 #include "fdf.h"
 
-int get_height(char *file_name)
+void get_height(char *file_name, t_fdf *fdf)
 {
-    char *line;
     int fd;
-    int height;
 
     fd = open(file_name, O_RDONLY, 0);
-    height = 0;
-    while (get_next_line(fd, &line))
+    if (fd < 0)
+        error_fdf("set_width open file error", 0);
+    fdf->height = 0;
+    while (get_next_line(fd, &fdf->line))
     {
-        height++;
-        free(line);
+        if (fdf->line == NULL)
+            error_fdf("set_width gnl malloc", 0);
+        fdf->height++;
+        free(fdf->line);
     }
     close(fd);
-    return (height);
 }
 
-int get_width(char *filename)
+void get_width(char *filename, t_fdf *fdf)
 {
-    char *line;
     int fd;
-    int width;
 
     fd = open(filename, O_RDONLY, 0);
-    get_next_line(fd, &line);
-    width = count_words(line, ' ');
-    free(line);
+    if (fd < 0)
+        error_fdf("set_width file open error", 0);
+    fdf->width = 0;
+    while (get_next_line(fd, &fdf->line))
+    {
+        if (fdf->line == NULL)
+        {
+            error_fdf("set width with malloc", 0);
+            close(fd);
+        }
+        if (fdf->width != 0 && count_words(fdf->line, ' ') != fdf->width)
+        {
+            error_fdf("invalid map width", 0);
+            close(fd);
+        }
+        fdf->width = fdf->width == 0 ? count_words(fdf->line, ' ') : fdf->width;
+        free(fdf->line);
+    }
     close(fd);
-    return (width);
 }
 
 void fill_matrix(int *z_line, char *line)
@@ -50,21 +63,23 @@ void fill_matrix(int *z_line, char *line)
     free(nums);
 }
 
-void read_map(char *file_name, fdf *data)
+void read_map(char *file_name, t_fdf *data)
 {
     int fd;
     char *line;
     int i;
 
-    data->height = get_height(file_name);
-    data->width = get_width(file_name);
+    get_height(file_name, data);
+    get_width(file_name, data);
     data->matrix = (int **)malloc(sizeof(int *) * (data->height + 1));
     i = 0;
     while (i <= data->height)
-        data->matrix[i++] = (int *)malloc(sizeof(int) * (data->width + 1));
+        if (!(data->matrix[i++] = (int *)malloc(sizeof(int) * (data->width + 1))))
+            error_fdf("matrix malloc", 0);
     fd = open(file_name, O_RDONLY, 0);
     i = 0;
-    while (get_next_line(fd, &line)) {
+    while (get_next_line(fd, &line))
+    {
         fill_matrix(data->matrix[i], line);
         free(line);
         i++;
