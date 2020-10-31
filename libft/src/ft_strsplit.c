@@ -6,14 +6,14 @@
 /*   By: tmyrcell <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/17 15:48:59 by tmyrcell          #+#    #+#             */
-/*   Updated: 2019/09/23 17:59:26 by tmyrcell         ###   ########.fr       */
+/*   Updated: 2020/10/29 12:47:20 by tmyrcell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/libft.h"
 #include <stdlib.h>
 
-size_t			count_words(const char *s, char c)
+size_t					count_words(const char *s, char c)
 {
 	size_t index;
 	size_t words;
